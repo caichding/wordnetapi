@@ -1,0 +1,2 @@
+toplink-essentials.jar  V2.1_build_b60  https://glassfish.dev.java.net/downloads/persistence/JavaPersistence.html
+h2.jar                  1.1.103         http://www.h2database.com/html/download.html

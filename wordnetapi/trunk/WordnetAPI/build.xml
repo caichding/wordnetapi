@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="WordnetAPI">
+	<property environment="env" />
+	<property name="build.dir.java" value="build/java" />
+	<property name="build.dir.test" value="build/test" />
+	<property name="database.dir" value="database" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="dist.dir" value="dist" />
+	<property name="jar.file" value="${dist.dir}/wordnetapi.jar" />
+	<property name="javadoc.dir" value="doc/api" />
+	<property name="junit.output.dir" value="${reports.dir}/junit" />
+	<property name="lib.dir" value="lib" />
+	<property name="reports.dir" value="${basedir}/reports" />
+	<property name="script.dir" value="script" />
+	<property name="source.dir" value="src" />
+	<property name="source" value="1.6" />
+	<property name="target" value="1.6" />
+	<property name="test.dir" value="test" />
+	<property name="test.lib.dir" value="test/lib" />
+	<property name="test.style.dir" value="test/styledir" />
+	<property name="version" value="1.0" />
+
+	<!-- Make sure that junit has this path -->
+	<path id="junit">
+		<pathelement location="/opt/junit/junit-4.4.jar" />
+	</path>
+
+	<path id="project.classpath">
+		<pathelement location="${build.dir.java}" />
+		<pathelement location="${build.dir.test}" />
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<pathelement location="${database.dir}" />
+	</path>
+
+	<path id="source.path">
+		<pathelement location="${source.dir}" />
+	</path>
+
+	<target name="init">
+		<mkdir dir="${build.dir.java}" />
+		<mkdir dir="${build.dir.test}" />
+		<copy includeemptydirs="false" todir="${build.dir.java}">
+			<fileset dir="${source.dir}" excludes="**/*.launch, **/*.java" />
+		</copy>
+		<copy includeemptydirs="false" todir="${build.dir.test}">
+			<fileset dir="${test.dir}" excludes="**/*.launch, **/*.java" />
+		</copy>
+	</target>
+
+	<target name="build" depends="init" description="Compile the sources">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<!-- Compile source dir -->
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${build.dir.java}" source="${source}" target="${target}">
+			<src refid="source.path" />
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="build.tests" depends="build">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<!-- Compile tests -->
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${build.dir.test}" source="${source}" target="${target}">
+			<src path="${test.dir}" />
+			<classpath refid="project.classpath" />
+			<classpath refid="junit" />
+		</javac>
+	</target>
+
+	<target name="clean" description="Delete the build directory">
+		<delete dir="${build.dir.java}" />
+		<delete dir="${build.dir.test}" />
+	</target>
+
+	<target name="run.tests" depends="build.tests" description="Run the unit-tests and create a html report">
+		<delete dir="${junit.output.dir}" />
+		<mkdir dir="${junit.output.dir}" />
+		<junit printsummary="withOutAndErr">
+			<formatter type="xml" />
+
+			<classpath refid="project.classpath" />
+			<classpath refid="junit" />
+			<batchtest todir="${junit.output.dir}">
+				<fileset dir="${test.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<!-- create report -->
+		<junitreport todir="${junit.output.dir}">
+			<fileset dir="${junit.output.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${junit.output.dir}" styledir="${test.style.dir}" />
+		</junitreport>
+	</target>
+
+	<target name="build.jar" depends="build" description="Create a jar file">
+		<mkdir dir="${dist.dir}" />
+		<jar destfile="${jar.file}" baseDir="${build.dir.java}">
+			<manifest>
+				<attribute name="Implementation-Version" value="${version} ${TODAY}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="javadoc" description="Create the javadoc for the sources">
+		<delete dir="${javadoc.dir}" />
+		<javadoc destdir="${javadoc.dir}" sourcepath="${source.dir}" access="public" author="true" doctitle="${ant.project.name}" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.6" splitindex="true" use="true" version="true">
+			<classpath refid="project.classpath" />
+		</javadoc>
+	</target>
+
+	<target name="create.db" description="Create the Wordnet H2 database">
+		<echo message="Attention! This target may take up to 4 hours!" />
+		<java classname="eu.kostia.dao.CreateWordnetDB" fork="true">
+			<sysproperty key="run.with.ant" value="true" />
+			<classpath refid="project.classpath" />
+			<arg value="${basedir}/dict" />
+		</java>
+	</target>
+
+	<target name="backup.db" description="Create a backup for the current database">
+		<java classname="org.h2.tools.Backup">
+			<classpath refid="project.classpath" />
+			<arg value="-file" />
+			<arg value="./database/wordnet.zip" />
+			<arg value="-dir" />
+			<arg value="./database" />
+			<arg value="-db" />
+			<arg value="wordnet" />
+		</java>
+	</target>
+
+	<target name="show.db.path" description="Show the DB Path">
+		<java classname="eu.kostia.util.H2DatabaseUtil" fork="true">
+			<classpath refid="project.classpath" />
+		</java>
+	</target>
+
+	<target name="create.dist" description="Create a binary distributable zip">
+		<delete dir="${dist.dir}/${ant.project.name}" />
+		<!-- Copy wordnetapi.jar -->
+		<mkdir dir="${dist.dir}/${ant.project.name}/lib" />
+		<copy file="${jar.file}" todir="${dist.dir}/${ant.project.name}/lib" overwrite="true" />
+
+		<!-- Copy external libraries -->
+		<mkdir dir="${dist.dir}/${ant.project.name}/ext" />
+		<copy todir="${dist.dir}/${ant.project.name}/ext" overwrite="true">
+			<fileset dir="${lib.dir}">
+				<exclude name="**/*_src.jar" />
+			</fileset>
+		</copy>
+
+		<!-- Copy database files -->
+		<mkdir dir="${dist.dir}/${ant.project.name}/database" />
+		<copy todir="${dist.dir}/${ant.project.name}/database" overwrite="true">
+			<fileset dir="${database.dir}">
+				<include name="*.db" />
+			</fileset>
+		</copy>
+
+		<!-- Copy script files -->
+		<copy todir="${dist.dir}/${ant.project.name}" overwrite="true">
+			<fileset dir="${script.dir}" />
+		</copy>
+
+		<!-- Create the distributable zip appending the version number -->
+		<zip destfile="${dist.dir}/${ant.project.name}-${version}.zip" basedir="${dist.dir}" update="true">
+			<include name="${ant.project.name}/**" />
+		</zip>
+	</target>
+
+</project>
