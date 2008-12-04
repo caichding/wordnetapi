@@ -1,0 +1,31 @@
+File format of index.<pos> files (where pos  is noun , verb , adj  and adv)
+***************************************************************************
+
+Format: lemma  pos  synset_cnt  p_cnt  [ptr_symbol...]  sense_cnt  tagsense_cnt   synset_offset  [synset_offset...]
+
+lemma
+    lower case ASCII text of word or collocation. Collocations are formed by joining individual words with an underscore (_ ) character. 
+pos
+    Syntactic category: n for noun files, v for verb files, a for adjective files, r for adverb files. 
+
+All remaining fields are with respect to senses of lemma in pos .
+
+synset_cnt
+    Number of synsets that lemma is in. This is the number of senses of the word in WordNet. See Sense Numbers below for a discussion of how sense numbers are assigned and the order of synset_offset s in the index files. 
+p_cnt
+    Number of different pointers that lemma has in all synsets containing it. 
+ptr_symbol
+    A space separated list of p_cnt different types of pointers that lemma has in all synsets containing it. See wninput(5WN) for a list of pointer_symbol s. If all senses of lemma have no pointers, this field is omitted and p_cnt is 0 . 
+sense_cnt
+    Same as sense_cnt above. This is redundant, but the field was preserved for compatibility reasons. 
+tagsense_cnt
+    Number of senses of lemma that are ranked according to their frequency of occurrence in semantic concordance texts. 
+synset_offset
+    Byte offset in data.pos file of a synset containing lemma . Each synset_offset in the list corresponds to a different sense of lemma in WordNet. synset_offset is an 8 digit, zero-filled decimal integer that can be used with fseek(3) to read a synset from the data file. When passed to read_synset(3WN) along with the syntactic category, a data structure containing the parsed synset is returned. 
+
+Example
+*******
+
+coverage n   3           2      @             +             3          2              13344664         05123760         06683784
+lemma    pos synset_cnt  p_cnt  ptr_symbol_1  ptr_symbol_2  sense_cnt  tagsense_cnt   synset_offset_1  synset_offset_2  synset_offset_3
+                                                            redundant: same of synset_cnt

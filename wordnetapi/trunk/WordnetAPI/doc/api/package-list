@@ -1,0 +1,7 @@
+eu.kostia.dao
+eu.kostia.entity
+eu.kostia.main
+eu.kostia.morph
+eu.kostia.scanner
+eu.kostia.util
+oracle.toplink.essentials.platform.database
