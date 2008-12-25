@@ -8,9 +8,9 @@
 	<property name="dist.dir" value="dist" />
 	<property name="jar.file" value="${dist.dir}/wordnetapi.jar" />
 	<property name="javadoc.dir" value="doc/api" />
-	<property name="junit.output.dir" value="${reports.dir}/junit" />
-	<property name="lib.dir" value="lib" />
 	<property name="reports.dir" value="${basedir}/reports" />
+	<property name="junit.output.dir" value="${reports.dir}/junit" />
+	<property name="lib.dir" value="lib" />	
 	<property name="script.dir" value="script" />
 	<property name="source.dir" value="src" />
 	<property name="source" value="1.6" />
@@ -47,6 +47,9 @@
 		<copy includeemptydirs="false" todir="${build.dir.test}">
 			<fileset dir="${test.dir}" excludes="**/*.launch, **/*.java" />
 		</copy>
+		
+		<!-- Init the DSTAMP, TSTAMP, and TODAY properties -->
+		<tstamp/>
 	</target>
 
 	<target name="build" depends="init" description="Compile the sources">
