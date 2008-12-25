@@ -1,22 +1,57 @@
 package eu.kostia.dao;
 
-import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
-import eu.kostia.entity.PartOfSpeech;
-import eu.kostia.entity.Word;
+import java.util.*;
+
+import org.junit.*;
+
+import eu.kostia.entity.*;
 
 public class WordDAOTest {
 
 	@Test
 	public void testFindByLemma() {
 		WordDAO dao = new WordDAO();
-		List<Word> words = dao.findByLemma("abandon");
+		String lemma = "abandon";
+		List<Word> words = dao.findByLemma(lemma);
 		System.out.println("Test findByLemma");
 		for (Word word : words) {
-			System.out.println(word.getLemma() + ": (" + word.getLexicalType() + ") " + word.getDefinition());
+			System.out.println(word.getLemma() + ": (" + word.getLexicalType()
+					+ ") " + word.getDefinition());
+			Set<Relation> relations = word.getSynset();
+			for (Relation relation : relations) {
+				System.out.println("\t" + relation.getSemanticRelationType()
+						+ "\t" + relation.getTarget().getLemma());
+			}
 		}
 		Assert.assertTrue(words.size() > 0);
+	}
+
+	@Test
+	public void testFindBySemanticRelationType() {
+		WordDAO dao = new WordDAO();
+		List<Word> words = dao.findBySemanticRelationType("conceptualization",
+				SemanticRelationType.HYPERNYM);
+		System.out.println("Test FindBySemanticRelationType");
+		for (Word word : words) {
+			System.out.println(word.getLemma() + ": (" + word.getLexicalType()
+					+ ") " + word.getDefinition());
+		}
+		Assert.assertTrue(words.size() == 4);
+		assertContains(words, "creating_by_mental_acts", "construct",
+				"conception", "concept");
+	}
+
+	private void assertContains(List<Word> words, String... lemmas) {
+		for (Word word : words) {
+			String currentLemma = word.getLemma();
+			for (String lemma : lemmas) {
+				if (lemma.equals(currentLemma)) {
+					return;
+				}
+			}
+
+			Assert.fail("'" + currentLemma + "' not in list");
+		}
 	}
 
 	@Test
@@ -25,7 +60,8 @@ public class WordDAOTest {
 		List<Word> words = dao.find(5835747L, PartOfSpeech.NOUN);
 		System.out.println("Test findBySynsetOffsetAndPos");
 		for (Word word : words) {
-			System.out.println(word.getLemma() + ": (" + word.getLexicalType() + ") " + word.getDefinition());
+			System.out.println(word.getLemma() + ": (" + word.getLexicalType()
+					+ ") " + word.getDefinition());
 		}
 		Assert.assertTrue(words.size() > 0);
 	}

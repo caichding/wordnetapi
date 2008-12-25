@@ -45,6 +45,33 @@ public class WordDAO extends AbstractDAO<Word, String> {
 		}
 	}
 
+	/**
+	 * Find words by lemma and semantic relation type
+	 * 
+	 * @param lemma
+	 *            A Lemma (case insensitive)
+	 * @param relationType
+	 *            A semantic relation type
+	 * @return The words that correspond to the lemma and the relation type
+	 */
+	public List<Word> findBySemanticRelationType(String lemma,
+			SemanticRelationType relationType) {
+		// TODO do in a more efficient way
+		List<Word> words = findByLemma(lemma);
+		List<Word> results = new ArrayList<Word>();
+		for (Word word : words) {
+			Set<Relation> synset = word.getSynset();
+			for (Relation relation : synset) {
+				if (relation.getSemanticRelationType() == relationType) {
+					Word target = relation.getTarget();
+					results.add(target);
+				}
+			}
+		}
+
+		return results;
+	}
+
 	@SuppressWarnings("unchecked")
 	public boolean existsLemma(String lemma) {
 		// In this case a native query is slightly faster

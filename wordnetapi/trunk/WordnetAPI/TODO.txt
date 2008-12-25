@@ -1,2 +1,0 @@
-25.11.08
-  * Add to Word the sense ranking

@@ -17,4 +17,4 @@ set WORDNETAPI_CLASSPATH=%WORDNETAPI_CLASSPATH%;%WORDNETAPI_HOME%\database
 
 set MAIN=eu.kostia.main.WordnetCLI
 
-java %JAVA_OPTS% -classpath %WORDNETAPI_CLASSPATH% %MAIN% %*
+java %JAVA_OPTS% -classpath "%WORDNETAPI_CLASSPATH%" %MAIN% %*

@@ -19,7 +19,7 @@
 			<property name="toplink.jdbc.password" value="sa" />
 			
 			<!-- Provider-specific settings -->
-			<property name="toplink.logging.level" value="SEVERE" />
+			<property name="toplink.logging.level" value="WARNING" />
 			<!-- Other options: create-tables, drop-and-create-tables, and none -->
 			<property name="toplink.ddl-generation" value="none" />
 			<property name="toplink.target-database" value="oracle.toplink.essentials.platform.database.H2Platform" />
